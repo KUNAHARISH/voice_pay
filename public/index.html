@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Pay | Next Gen Banking</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Face API -->
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <!-- Razorpay Checkout -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+
+<body>
+
+    <div id="loader" class="loader-container">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="app" class="hidden">
+
+        <!-- Landing Page Section -->
+        <section id="landing-section" class="active-section">
+            <div class="landing-container">
+                <nav class="landing-nav">
+                    <div class="logo">
+                        <i class="fa-solid fa-shapes"></i> Voice Pay
+                    </div>
+                </nav>
+
+                <div class="hero-content">
+                    <div class="hero-text-block">
+                        <h1 class="hero-title">Experience the <br> <span class="text-gradient">Future of Payments</span>
+                        </h1>
+                        <p class="hero-subtitle">Secure, fast, and hands-free banking powered by your unique voice and
+                            face.</p>
+                        <button onclick="goToAuth()" class="btn btn-primary btn-lg">
+                            Get Started <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <div class="hero-image-block">
+                        <img src="img/hero.png" alt="Voice Pay Hero Illustration" class="hero-img">
+                    </div>
+                </div>
+
+                <div class="features-row">
+                    <div class="feature-item">
+                        <i class="fa-solid fa-fingerprint"></i>
+                        <h3>Biometric Security</h3>
+                        <p>Advanced face and voice recognition.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fa-solid fa-bolt"></i>
+                        <h3>Lightning Fast</h3>
+                        <p>Transfer money in seconds.</p>
+                    </div>
+                </div>
+
+                <!-- How It Works Section -->
+                <div class="how-it-works">
+                    <h2 class="section-title">How It Works</h2>
+                    <div class="steps-grid">
+                        <div class="step-card">
+                            <span class="step-num">1</span>
+                            <h4>Register</h4>
+                            <p>Sign up with your mobile number and face.</p>
+                        </div>
+                        <div class="step-card">
+                            <span class="step-num">2</span>
+                            <h4>Login</h4>
+                            <p>Seamlessly access your account using just your face.</p>
+                        </div>
+                        <div class="step-card">
+                            <span class="step-num">3</span>
+                            <h4>Voice Command</h4>
+                            <p>Say "Transfer money" or "Pay Bill" to bank hands-free.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Section -->
+                <div class="security-section">
+                    <h2 class="section-title">Bank-Grade Security</h2>
+                    <div class="security-grid">
+                        <div class="security-item">
+                            <i class="fa-solid fa-lock"></i>
+                            <div>
+                                <h4>End-to-End Encryption</h4>
+                                <p>Your voice and face data are encrypted instantly.</p>
+                            </div>
+                        </div>
+                        <div class="security-item">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <div>
+                                <h4>Identity Protection</h4>
+                                <p>Biometric spoofing detection ensures only YOU can login.</p>
+                            </div>
+                        </div>
+                        <div class="security-item">
+                            <i class="fa-solid fa-server"></i>
+                            <div>
+                                <h4>24/7 Monitoring</h4>
+                                <p>Continuous fraud detection for every transaction.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <footer class="landing-footer">
+                    <div class="footer-links">
+                        <span><i class="fa-brands fa-twitter"></i></span>
+                        <span><i class="fa-brands fa-instagram"></i></span>
+                        <span><i class="fa-brands fa-linkedin"></i></span>
+                    </div>
+                    <p>&copy; 2024 Voice Pay. All rights reserved.</p>
+                </footer>
+            </div>
+        </section>
+
+        <!-- Auth Section -->
+        <section id="auth-section" class="hidden-section">
+            <div class="auth-container">
+                <button onclick="goBack()" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+                <div class="clean-card auth-card">
+                    <div class="logo" style="justify-content: center; margin-bottom: 20px;">
+                        <i class="fa-solid fa-shapes"></i> Voice Pay
+                    </div>
+                    <h1>Welcome Back</h1>
+                    <p class="subtitle">Secure login with Face & Voice</p>
+
+                    <div class="camera-wrapper">
+                        <video id="video-feed" autoplay muted></video>
+                        <canvas id="face-canvas"></canvas>
+                        <div class="scan-overlay"></div>
+                    </div>
+
+                    <div class="auth-controls">
+                        <div class="input-group">
+                            <input type="tel" id="mobile-input" placeholder="Enter Mobile Number">
+                        </div>
+
+                        <div class="action-buttons">
+                            <button id="btn-login" class="btn btn-primary">
+                                <i class="fa-solid fa-unlock"></i> Login
+                            </button>
+                            <button id="btn-register" class="btn btn-secondary">
+                                <i class="fa-solid fa-user-plus"></i> Create Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="hidden-section">
+            <div class="dashboard-grid">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <div class="logo" style="margin-bottom: 40px;">
+                        <i class="fa-solid fa-shapes"></i> Voice Pay
+                    </div>
+
+                    <div class="assistant-avatar">
+                        <i class="fa-solid fa-microphone"></i>
+                    </div>
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h4 style="color: var(--secondary)">AI Assistant</h4>
+                        <span id="listening-indicator" style="font-size: 0.8rem; color: var(--primary)">Ready</span>
+                        <p id="voice-text"
+                            style="font-size: 0.8rem; color: var(--text-body); margin-top: 5px; min-height: 1.2em; font-style: italic;">
+                            ...</p>
+                    </div>
+
+                    <div class="input-group">
+                        <button id="btn-mic-toggle" class="btn btn-primary"
+                            style="width: 100%; justify-content: center;">
+                            <i class="fa-solid fa-microphone-slash"></i> Toggle Mic
+                        </button>
+                    </div>
+
+                    <div id="chat-history" class="chat-history"
+                        style="flex: 1; margin-top: 20px; overflow-y: auto; font-size: 0.9rem; color: var(--text-body);">
+                        <div class="chat-msg bot">Hello! I am ready to help.</div>
+                    </div>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="main-content">
+
+                    <!-- VIEW 1: DASHBOARD HOME -->
+                    <div id="dashboard-home" class="view-section">
+                        <!-- Header -->
+                        <header class="user-header">
+                            <div>
+                                <h2 id="user-greeting">Hello, User</h2>
+                                <p style="color: var(--text-body)">Welcome back</p>
+                            </div>
+                            <div class="nav-status">
+                                <button class="btn btn-secondary" onclick="logout()">
+                                    <i class="fa-solid fa-power-off"></i>
+                                </button>
+                            </div>
+                        </header>
+
+                        <!-- Balance Card (Secure) -->
+                        <div class="balance-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <span class="label">Total Balance</span>
+                                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                                        <h2 id="balance-display" class="balance-amount"
+                                            style="font-size: 1.8rem; margin: 0;">••••••</h2>
+                                        <button class="btn-icon-small" onclick="checkBalance()">
+                                            <i class="fa-solid fa-eye" id="balance-toggle-icon"></i>
+                                        </button>
+                                    </div>
+                                    <p id="balance-status"
+                                        style="font-size: 0.8rem; color: rgba(255,255,255,0.8); margin-top: 5px;">Tap
+                                        eye to view</p>
+                                </div>
+                                <i class="fa-brands fa-cc-visa" style="font-size: 2.5rem; opacity: 0.8;"></i>
+                            </div>
+                        </div>
+
+                        <!-- Transfer Money Section -->
+                        <div class="section-block" style="margin-top: 30px;">
+                            <h3 class="section-label">Transfer Money</h3>
+                            <div class="quick-actions-row">
+                                <div class="action-item" onclick="openTransferView()">
+                                    <div class="icon-circle bg-blue"><i class="fa-solid fa-user"></i></div>
+                                    <span>To Contact</span>
+                                </div>
+                                <div class="action-item" onclick="openTransferView()">
+                                    <div class="icon-circle bg-blue"><i class="fa-solid fa-building-columns"></i></div>
+                                    <span>To Bank</span>
+                                </div>
+                                <div class="action-item" onclick="openSelfTransferView()">
+                                    <div class="icon-circle bg-blue"><i class="fa-solid fa-user-self"></i></div>
+                                    <span>To Self</span>
+                                </div>
+                                <div class="action-item" onclick="checkBalance()">
+                                    <div class="icon-circle bg-blue"><i class="fa-solid fa-building-columns"></i></div>
+                                    <span>Check Bal</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recharge & Pay Bills Section -->
+                        <div class="section-block" style="margin-top: 30px;">
+                            <h3 class="section-label">Recharge & Pay Bills</h3>
+                            <div class="quick-actions-grid">
+                                <div class="action-item" onclick="openBillView('Mobile')">
+                                    <div class="icon-circle"><i class="fa-solid fa-mobile-screen"></i></div>
+                                    <span>Mobile</span>
+                                </div>
+                                <div class="action-item" onclick="openBillView('Electricity')">
+                                    <div class="icon-circle"><i class="fa-solid fa-lightbulb"></i></div>
+                                    <span>Electric</span>
+                                </div>
+                                <div class="action-item" onclick="openBillView('DTH')">
+                                    <div class="icon-circle"><i class="fa-solid fa-tv"></i></div>
+                                    <span>DTH</span>
+                                </div>
+                                <div class="action-item" onclick="openBillView('Credit Card')">
+                                    <div class="icon-circle"><i class="fa-solid fa-credit-card"></i></div>
+                                    <span>Credit Card</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- VIEW 2: TRANSFER - SELECT CONTACT -->
+                    <div id="transfer-contact-view" class="view-section hidden">
+                        <div class="view-header">
+                            <button class="back-icon" onclick="backToHome()"><i
+                                    class="fa-solid fa-arrow-left"></i></button>
+                            <h3>Send Money</h3>
+                        </div>
+
+                        <div class="search-bar-container">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" placeholder="Search name or number" class="search-input">
+                        </div>
+
+                        <h4 class="section-label" style="margin: 20px 0 10px;">Recents</h4>
+                        <div class="contact-list">
+                            <div class="contact-item" onclick="selectContact('Mom', '1234')">
+                                <div class="avatar">M</div>
+                                <div class="contact-info">
+                                    <h4>Mom</h4>
+                                    <p>+1 98765 43210</p>
+                                </div>
+                            </div>
+                            <div class="contact-item" onclick="selectContact('Dad', '5678')">
+                                <div class="avatar">D</div>
+                                <div class="contact-info">
+                                    <h4>Dad</h4>
+                                    <p>+1 98765 00000</p>
+                                </div>
+                            </div>
+                            <div class="contact-item" onclick="selectContact('Brother', '9999')">
+                                <div class="avatar">B</div>
+                                <div class="contact-info">
+                                    <h4>Brother</h4>
+                                    <p>+1 11223 34455</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 3: TRANSFER - ENTER AMOUNT -->
+                    <div id="transfer-amount-view" class="view-section hidden">
+                        <div class="view-header">
+                            <button class="back-icon" onclick="openTransferView()"><i
+                                    class="fa-solid fa-arrow-left"></i></button>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="avatar small" id="pay-avatar">U</div>
+                                <div>
+                                    <h4 id="pay-name" style="margin:0; font-size: 1rem;">Receiver</h4>
+                                    <p id="pay-id" style="margin:0; font-size: 0.8rem; opacity: 0.8;">+1 987...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="amount-container">
+                            <p>Enter Amount</p>
+                            <div class="amount-input-wrapper">
+                                <span>$</span>
+                                <input type="number" id="pay-amount-input" placeholder="0" autofocus>
+                            </div>
+                            <p class="balance-hint">Bank Account: **** 4242</p>
+                        </div>
+
+                        <div class="bottom-action-bar">
+                            <div class="mini-camera-preview">
+                                <video id="mini-video" autoplay muted playsinline></video>
+                            </div>
+                            <button class="btn-pay" onclick="verifyAndPay()">
+                                Pay Now
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 6: BILL PAYMENT -->
+                    <div id="bill-pay-view" class="view-section hidden">
+                        <div class="view-header">
+                            <button class="back-icon" onclick="backToHome()"><i
+                                    class="fa-solid fa-arrow-left"></i></button>
+                            <h3>Pay Bill</h3>
+                        </div>
+
+                        <div class="balance-card"
+                            style="background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-color); box-shadow: none; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div class="icon-circle bg-blue" id="bill-icon" style="width: 40px; height: 40px;"><i
+                                        class="fa-solid fa-bolt"></i></div>
+                                <div>
+                                    <h4 id="bill-type-label" style="margin: 0; color: var(--secondary);">Electricity
+                                    </h4>
+                                    <p style="margin: 0; font-size: 0.8rem; color: var(--text-body);">Biller Details</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="amount-container">
+                            <div class="input-group" style="margin-bottom: 15px;">
+                                <label style="font-size: 0.9rem; margin-bottom: 5px; display: block;">Consumer Number /
+                                    ID</label>
+                                <input type="text" id="bill-consumer-id" placeholder="Enter ID"
+                                    style="background: white; border: 1px solid var(--border-color);">
+                            </div>
+
+                            <p style="margin-bottom: 10px;">Bill Amount</p>
+                            <div class="amount-input-wrapper">
+                                <span>$</span>
+                                <input type="number" id="bill-amount-input" placeholder="0">
+                            </div>
+                            <p class="balance-hint">Bank Account: **** 4242</p>
+                        </div>
+
+                        <div class="bottom-action-bar">
+                            <!-- Reuse mini video for auth preview -->
+                            <div class="mini-camera-preview">
+                                <video id="bill-mini-video" autoplay muted playsinline></video>
+                            </div>
+                            <button class="btn-pay" onclick="verifyAndPayBill()">
+                                Pay Bill
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 4: SUCCESS SCREEN -->
+                    <div id="success-view" class="view-section hidden success-bg">
+                        <div class="success-content">
+                            <div class="tick-animation">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                            <h2>Payment Successful</h2>
+                            <h1 id="success-amount">$0</h1>
+                            <p id="success-msg">Paid successfully</p>
+                            <button class="btn btn-secondary" onclick="backToHome()"
+                                style="margin-top: 30px; background: white; border: none; color: var(--primary);">Done</button>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 5: HISTORY -->
+                    <div id="history-view" class="view-section hidden">
+                        <div class="view-header">
+                            <button class="back-icon" onclick="backToHome()"><i
+                                    class="fa-solid fa-arrow-left"></i></button>
+                            <h3>History</h3>
+                        </div>
+                        <div id="transaction-list" class="history-list full-list">
+                            <!-- JS Injected -->
+                        </div>
+                    </div>
+
+                    <!-- MY CARDS MODAL END -->
+
+                    <!-- UPI PIN OVERLAY -->
+                    <div id="upi-pin-overlay" class="pin-overlay hidden">
+                        <div class="pin-container">
+                            <h3 style="color: var(--primary);">Enter UPI PIN</h3>
+                            <p style="font-size: 0.9rem; color: #666;">Paying $<span id="pin-amount-display">0</span>
+                            </p>
+
+                            <div class="pin-dots">
+                                <div class="pin-dot" id="dot-1"></div>
+                                <div class="pin-dot" id="dot-2"></div>
+                                <div class="pin-dot" id="dot-3"></div>
+                                <div class="pin-dot" id="dot-4"></div>
+                            </div>
+
+                            <div class="pin-keypad">
+                                <button class="pin-key" onclick="enterPin(1)">1</button>
+                                <button class="pin-key" onclick="enterPin(2)">2</button>
+                                <button class="pin-key" onclick="enterPin(3)">3</button>
+                                <button class="pin-key" onclick="enterPin(4)">4</button>
+                                <button class="pin-key" onclick="enterPin(5)">5</button>
+                                <button class="pin-key" onclick="enterPin(6)">6</button>
+                                <button class="pin-key" onclick="enterPin(7)">7</button>
+                                <button class="pin-key" onclick="enterPin(8)">8</button>
+                                <button class="pin-key" onclick="enterPin(9)">9</button>
+                                <button class="pin-key" onclick="clearPin()"><i
+                                        class="fa-solid fa-delete-left"></i></button>
+                                <button class="pin-key" onclick="enterPin(0)">0</button>
+                                <button class="pin-key" onclick="submitPin()"
+                                    style="background: var(--primary); color: white;"><i
+                                        class="fa-solid fa-check"></i></button>
+                            </div>
+                            <button onclick="closePinOverlay()"
+                                style="margin-top: 20px; background: none; border: none; color: #888; text-decoration: underline;">Cancel</button>
+                        </div>
+                    </div>
+
+                </main>
+            </div>
+        </section>
+
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
